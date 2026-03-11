@@ -333,7 +333,7 @@
                         <path d="M15.9289 2.62891C16.8196 1.73826 18.2342 1.73826 19.1249 2.62891C20.0155 3.51956 20.0155 4.93417 19.1249 5.82482L15.1249 9.82482C14.2342 10.7155 12.8196 10.7155 11.9289 9.82482C11.0383 8.93417 11.0383 7.51956 11.9289 6.62891L15.9289 2.62891Z" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M2.5 15.625H6.5" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <span>Tel: 400-123-4567</span>
+                    <span>Tel: 16265608711 </span>
                 </div>
                 <div class="contact-item">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -705,3 +705,4 @@
     </script>
 </body>
 </html>
+
