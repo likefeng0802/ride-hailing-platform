@@ -390,11 +390,12 @@
                 <button type="button" id="toggleAirportList" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #2c3e50; font-size: 1.2rem; display: none;">▼</button>
             </div>
             <div class="airport-select" id="airportSelect">
-                <div class="airport-option" data-value="Beijing Capital International Airport">Beijing Capital International Airport</div>
-                <div class="airport-option" data-value="Shanghai Pudong International Airport">Shanghai Pudong International Airport</div>
-                <div class="airport-option" data-value="Guangzhou Baiyun International Airport">Guangzhou Baiyun International Airport</div>
-                <div class="airport-option" data-value="Shenzhen Bao'an International Airport">Shenzhen Bao'an International Airport</div>
-                <div class="airport-option" data-value="Chengdu Shuangliu International Airport">Chengdu Shuangliu International Airport</div>
+                <div class="airport-option" data-value="Los Angeles International Airport">Los Angeles International Airport</div>
+                <div class="airport-option" data-value="Hollywood Burbank Airport">Hollywood Burbank Airport</div>
+                <div class="airport-option" data-value="Van Guys Airport">Van Guys Airport</div>
+                <div class="airport-option" data-value="Santa Monica Airport">Santa Monica Airport</div>
+                <div class="airport-option" data-value="Long Beach Airport">Long Beach Airport</div>
+                <div class="airport-option" data-value="John Wayn Airport">John Wayn Airport</div>
             </div>
             <div class="error-text" id="toError">Please enter destination</div>
         </div>
@@ -705,4 +706,5 @@
     </script>
 </body>
 </html>
+
 
