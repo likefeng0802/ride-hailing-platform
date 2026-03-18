@@ -69,7 +69,7 @@ function renderHtml(payload) {
 app.post('/api/booking-email', async (req, res) => {
   try {
     const payload = req.body || {};
-    const to = (localSMTP && localSMTP.to) || process.env.MAIL_TO || '18753235104@163.com';
+    const to = (localSMTP && localSMTP.to) || process.env.MAIL_TO || 'leeexecutivetranport@gmail.com';
     const from = (localSMTP && localSMTP.from) || process.env.MAIL_FROM || '正人君Bot <zhv0831@163.com>';
     const subject = process.env.MAIL_SUBJECT || 'New Booking';
     const html = renderHtml(payload);
@@ -93,7 +93,7 @@ app.post('/api/booking-email', async (req, res) => {
 
 app.post('/api/booking-email/test', async (req, res) => {
   try {
-    const to = (req.body && req.body.to) || (localSMTP && localSMTP.to) || '18753235104@163.com';
+    const to = (req.body && req.body.to) || (localSMTP && localSMTP.to) || 'leeexecutivetranport@gmail.com';
     const from = (localSMTP && localSMTP.from) || '正人君Bot <zhv0831@163.com>';
     const subject = 'Test Mail';
     const text = 'Test booking mail connectivity';
@@ -113,7 +113,7 @@ app.post('/api/booking-email/test', async (req, res) => {
 app.post('/api/booking-email/test', async (req, res) => {
   try {
     const transporter = await createTransporter();
-    const to = (req.body && req.body.to) || (localSMTP && localSMTP.to) || '18753235104@163.com';
+    const to = (req.body && req.body.to) || (localSMTP && localSMTP.to) || 'leeexecutivetranport@gmail.com';
     const from = (localSMTP && localSMTP.from) || '正人君Bot <zhv0831@163.com>';
     const subject = 'Test Mail';
     const text = 'Test booking mail connectivity';

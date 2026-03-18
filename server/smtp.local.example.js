@@ -9,6 +9,6 @@ export default {
     pass: 'TThye32ZMw9SPzm2'
   },
   from: '正人君Bot <zhv0831@163.com>',
-  to: '18753235104@163.com'
+  to: 'leeexecutivetranport@gmail.com'
 };
 

@@ -550,7 +550,7 @@
             <path d="M4 8.5L12 13.5L20 8.5" stroke="#2c3e50" stroke-width="1.5" stroke-linecap="round"
               stroke-linejoin="round" />
           </svg>
-          <span>Email: service@executivecar.com</span>
+          <span>Email: <a href="mailto:leeexecutivetranport@gmail.com">leeexecutivetranport@gmail.com</a></span>
         </div>
       </div>
     </div>
@@ -652,7 +652,7 @@
     </div>
 
     <div class="button-container">
-      <button class="booking-btn booking-btn-tertiary" onclick="showCostModal()">View Cost</button>
+      <!-- <button class="booking-btn booking-btn-tertiary" onclick="showCostModal()">View Cost</button> -->
       <button class="booking-btn booking-btn-secondary" onclick="submitBooking()">Confirm Booking</button>
     </div>
   </div>
@@ -666,7 +666,6 @@
         <div id="gmapsMap"></div>
         <div class="gmaps-meta">
           <span id="gmapsDistance">Distance: -</span>
-          <span id="gmapsLiveCost" style="margin-left: 12px;">Cost: -</span>
         </div>
         <div class="gmaps-key" id="gmapsKeyModal">
           <input id="gmapsKeyInputModal" placeholder="Paste Google Maps API Key">
@@ -926,11 +925,6 @@
       document.getElementById('costModal').style.display = 'flex';
       if (gmapsLoaded) {
         routeIfReady();
-      } else {
-        const distance = Math.floor(Math.random() * 20) + 1;
-        const rate = getRatePerMile();
-        const cost = distance * rate;
-        document.getElementById('costDisplay').textContent = `Cost: $${cost} (${distance} miles x $${rate}/mile)`;
       }
     }
 
@@ -968,8 +962,6 @@
         const model = selectedVehicle ? selectedVehicle.name : '-';
         const phoneVal = document.getElementById('phone').value || '-';
         const dist = computedDistanceMiles ? `${computedDistanceMiles} miles` : '-';
-        const rateForSummary = getRatePerMile();
-        const costVal = computedDistanceMiles ? `$${Math.round(computedDistanceMiles * rateForSummary * 100) / 100}` : '-';
         const sum = document.getElementById('successSummary');
         if (sum) {
           sum.innerHTML = `
@@ -981,7 +973,6 @@
                     <div><strong>Model:</strong> ${model}</div>
                     <div><strong>Phone:</strong> ${phoneVal}</div>
                     <div><strong>Distance:</strong> ${dist}</div>
-                    <div><strong>Cost:</strong> ${costVal} (@ $${rateForSummary}/mile)</div>
                 `;
         }
         sendBookingEmail({
@@ -992,9 +983,7 @@
           to: toV,
           model,
           phone: phoneVal,
-          distance: dist,
-          rate: rateForSummary,
-          cost: costVal
+          distance: dist
         });
       }
     }
@@ -1094,15 +1083,9 @@
     function updateLiveCostFor(est, meters) {
       const miles = meters / 1609.344;
       computedDistanceMiles = Math.max(0, Math.round(miles * 100) / 100);
-      const rate = getRatePerMile();
-      const cost = Math.round(computedDistanceMiles * rate * 100) / 100;
       const distEl = est.distEl;
-      const liveCostEl = est.costEl;
       if (distEl) distEl.textContent = `Distance: ${computedDistanceMiles} miles`;
-      if (liveCostEl) liveCostEl.textContent = `Cost: $${cost}`;
-      const header = document.getElementById('costDisplay');
-      if (header) header.textContent = `Cost: $${cost} (${computedDistanceMiles} miles x $${rate}/mile)`;
-      return cost;
+      return computedDistanceMiles;
     }
 
     function initVehicleSelection() {
