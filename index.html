@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Executive Car Service</title>
+  <meta name="gmaps_api_key" content="AIzaSyC7zecP_DMxUwKI0eBawVdzWXxlW7L0MA"/>
   <style>
     /* 基础样式重置 */
     * {
@@ -1145,28 +1146,31 @@
     
     async function sendBookingEmail(payload) {
       try {
-        const resp = await fetch('http://localhost:4000/api/booking-email', {
+        const resp = await fetch('http://localhost:3690/api/booking-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         const data = await resp.json();
-        console.log('email result', data);
       } catch (e) {
         console.error('email send failed', e);
       }
     }
 
     function loadGoogleMaps() {
-      const params = new URLSearchParams(window.location.search);
-      const qp = params.get('gkey');
-      if (qp) { try { localStorage.setItem('gmaps_api_key', qp); } catch (e) { } }
-      const key = qp || localStorage.getItem('gmaps_api_key');
-      if (!key) return;
+      const meta = document.querySelector('meta[name="gmaps_api_key"]');
+      const key = meta && meta.content ? meta.content.trim() : '';
+      if (!key) {
+        console.error('Google Maps API key missing in <meta name="gmaps_api_key">');
+        return;
+      }
       const s = document.createElement('script');
       s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&libraries=places&callback=initGoogleMaps';
       s.async = true;
       s.defer = true;
+      s.onerror = function () {
+        console.error('Google Maps failed to load. Verify API key and HTTP referrer restrictions for this domain.');
+      };
       document.body.appendChild(s);
     }
 
@@ -1195,7 +1199,8 @@
     function manualLoadKeyFrom(inputId, hideId) {
       const el = document.getElementById(inputId);
       if (!el || !el.value) return;
-      try { localStorage.setItem('gmaps_api_key', el.value.trim()); } catch (e) { }
+      const meta = document.querySelector('meta[name="gmaps_api_key"]');
+      if (meta) meta.content = el.value.trim();
       const hide = document.getElementById(hideId);
       if (hide) hide.style.display = 'none';
       loadGoogleMaps();

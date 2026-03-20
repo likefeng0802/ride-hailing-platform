@@ -124,7 +124,7 @@ app.post('/api/booking-email/test', async (req, res) => {
     res.status(500).json({ ok: false, error: e.message || 'send_failed' });
   }
 });
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
+const PORT = 3690;
 app.listen(PORT, () => {
   console.log(`Mailer server on http://localhost:${PORT}`);
 });

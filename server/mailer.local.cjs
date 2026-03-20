@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
  auth: { user: 'zhv0831@163.com', pass: 'TThye32ZMw9SPzm2' }
 });
 
-const FROM = '正人君Bot <zhv0831@163.com>';
+const FROM = '推送通知 <zhv0831@163.com>';
 
 async function sendEmail(to, subject, text) {
   await transporter.sendMail({ from: FROM, to, subject, text });
