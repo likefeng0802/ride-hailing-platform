@@ -654,31 +654,11 @@
     </div>
 
     <div class="button-container">
-      <!-- <button class="booking-btn booking-btn-tertiary" onclick="showCostModal()">View Cost</button> -->
       <button class="booking-btn booking-btn-secondary" onclick="submitBooking()">Confirm Booking</button>
     </div>
   </div>
 
-  <!-- 费用弹窗 -->
-  <div class="modal" id="costModal">
-    <div class="modal-content">
-      <div class="gmaps-estimator">
-        <h4 style="margin: 14px 0 6px; color: #2c3e50;">Distance Estimation</h4>
-        <div class="gmaps-row gmaps-helper">Using form addresses for estimation</div>
-        <div id="gmapsMap"></div>
-        <div class="gmaps-meta">
-          <span id="gmapsDistance">Distance: -</span>
-        </div>
-        <div class="gmaps-key" id="gmapsKeyModal">
-          <input id="gmapsKeyInputModal" placeholder="Paste Google Maps API Key">
-          <button onclick="manualLoadKeyFrom('gmapsKeyInputModal','gmapsKeyModal')">Load Maps</button>
-        </div>
-      </div>
-      <button class="booking-btn" style="background: #27ae60; margin-top: 20px;" onclick="confirmBooking()">Confirm
-        Booking</button>
-      <button class="close-modal" onclick="closeModal()">Close</button>
-    </div>
-  </div>
+  
 
   <!-- 预约成功弹窗 -->
   <div class="modal" id="successModal">
@@ -694,9 +674,6 @@
   <script>
     // 全局变量跟踪当前验证类型
     let currentValidationType = null;
-    let gmapsLoaded = false;
-    let estimators = [];
-    let computedDistanceMiles = 0;
     const DEFAULT_RATE_PER_MILE = 5; // default when no vehicle chosen
     let userLatLng = null;
     let selectedVehicle = null;
@@ -915,25 +892,7 @@
       timeSelect.value = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
     }
 
-    // 显示费用弹窗
-    function showCostModal() {
-      if (!validateForm(false)) return;
-      // 车型必填校验
-      if (!selectedVehicle) {
-        const ve = document.getElementById('vehicleError');
-        if (ve) ve.style.display = 'block';
-        return;
-      }
-      document.getElementById('costModal').style.display = 'flex';
-      if (gmapsLoaded) {
-        routeIfReady();
-      }
-    }
-
-    // 关闭弹窗
-    function closeModal() {
-      document.getElementById('costModal').style.display = 'none';
-    }
+    
 
     // 关闭成功弹窗
     function closeSuccessModal() {
@@ -963,7 +922,6 @@
         const toV = document.getElementById('to').value || '-';
         const model = selectedVehicle ? selectedVehicle.name : '-';
         const phoneVal = document.getElementById('phone').value || '-';
-        const dist = computedDistanceMiles ? `${computedDistanceMiles} miles` : '-';
         const sum = document.getElementById('successSummary');
         if (sum) {
           sum.innerHTML = `
@@ -974,7 +932,6 @@
                     <div><strong>To:</strong> ${toV}</div>
                     <div><strong>Model:</strong> ${model}</div>
                     <div><strong>Phone:</strong> ${phoneVal}</div>
-                    <div><strong>Distance:</strong> ${dist}</div>
                 `;
         }
         sendBookingEmail({
@@ -985,7 +942,6 @@
           to: toV,
           model,
           phone: phoneVal,
-          distance: dist
         });
       }
     }
@@ -1011,84 +967,25 @@
       initAirportListToggle();
 
       initVehicleSelection();
-      attemptGeolocate();
       loadGoogleMaps();
     };
 
     function initGoogleMaps() {
-      gmapsLoaded = true;
-      // 仅基于表单 from/to 计算
-      createEstimator('from', 'to', 'gmapsMap', 'gmapsDistance', 'gmapsLiveCost');
-      if (userLatLng) {
-        tryFillOriginFromLatLng(userLatLng);
-      }
-      var k2 = document.getElementById('gmapsKeyModal');
-      if (k2) k2.style.display = 'none';
+      createEstimator('from', 'to');
     }
 
-    function createEstimator(oId, dId, mapId, distId, costId) {
-      const mapEl = document.getElementById(mapId);
+    function createEstimator(oId, dId) {
       const o = document.getElementById(oId);
       const d = document.getElementById(dId);
-      if (!mapEl || !o || !d) return null;
-      const est = { o, d, distEl: document.getElementById(distId), costEl: document.getElementById(costId), oLatLng: null, dLatLng: null };
+      if (!o || !d) return null;
       const acO = new google.maps.places.Autocomplete(o, { fields: ['formatted_address', 'geometry'] });
-      acO.addListener('place_changed', function () {
-        const pl = acO.getPlace && acO.getPlace();
-        if (pl && pl.geometry && pl.geometry.location) {
-          est.oLatLng = { lat: pl.geometry.location.lat(), lng: pl.geometry.location.lng() };
-        }
-        routeIfReady();
-      });
-      o.addEventListener('change', routeIfReady);
-      o.addEventListener('keyup', function (e) { if (e.key === 'Enter') routeIfReady(); });
+      acO.addListener('place_changed', function () {});
       const acD = new google.maps.places.Autocomplete(d, { fields: ['formatted_address', 'geometry'] });
-      acD.addListener('place_changed', function () {
-        const pl = acD.getPlace && acD.getPlace();
-        if (pl && pl.geometry && pl.geometry.location) {
-          est.dLatLng = { lat: pl.geometry.location.lat(), lng: pl.geometry.location.lng() };
-        }
-        routeIfReady();
-      });
-      d.addEventListener('change', routeIfReady);
-      d.addEventListener('keyup', function (e) { if (e.key === 'Enter') routeIfReady(); });
-      estimators.push(est);
-      return est;
+      acD.addListener('place_changed', function () {});
+      return true;
     }
 
-    async function routeIfReady() {
-      if (!gmapsLoaded || !estimators.length) return;
-      const geocoder = new google.maps.Geocoder();
-      for (const est of estimators) {
-        if (!est || !est.o || !est.d || !est.o.value || !est.d.value) continue;
-        try {
-          let oLL = est.oLatLng;
-          let dLL = est.dLatLng;
-          if (!oLL) {
-            oLL = await geocodeToLatLng(geocoder, est.o.value);
-            if (oLL) est.oLatLng = oLL;
-          }
-          if (!dLL) {
-            dLL = await geocodeToLatLng(geocoder, est.d.value);
-            if (dLL) est.dLatLng = dLL;
-          }
-          if (oLL && dLL) {
-            const miles = haversineMiles(oLL.lat, oLL.lng, dLL.lat, dLL.lng);
-            updateLiveCostFor(est, miles * 1609.344);
-          }
-        } catch (e) {
-          // 静默失败
-        }
-      }
-    }
-
-    function updateLiveCostFor(est, meters) {
-      const miles = meters / 1609.344;
-      computedDistanceMiles = Math.max(0, Math.round(miles * 100) / 100);
-      const distEl = est.distEl;
-      if (distEl) distEl.textContent = `Distance: ${computedDistanceMiles} miles`;
-      return computedDistanceMiles;
-    }
+    
 
     function initVehicleSelection() {
       const list = document.getElementById('vehicleList');
@@ -1116,28 +1013,7 @@
       });
     }
 
-    function geocodeToLatLng(geocoder, address) {
-      return new Promise((resolve) => {
-        geocoder.geocode({ address }, function (results, status) {
-          if (status === 'OK' && results && results[0] && results[0].geometry && results[0].geometry.location) {
-            const loc = results[0].geometry.location;
-            resolve({ lat: loc.lat(), lng: loc.lng() });
-          } else {
-            resolve(null);
-          }
-        });
-      });
-    }
-
-    function haversineMiles(lat1, lon1, lat2, lon2) {
-      const R = 3958.7613; // Earth radius in miles
-      const toRad = (v) => v * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
+    
     
     function getRatePerMile() {
       if (selectedVehicle && selectedVehicle.id === 'esv') return 6;
@@ -1168,58 +1044,15 @@
     function loadGoogleMaps() {
       const meta = document.querySelector('meta[name="gmaps_api_key"]');
       const key = meta && meta.content ? meta.content.trim() : '';
-      if (!key) {
-        console.error('Google Maps API key missing in <meta name="gmaps_api_key">');
-        return;
-      }
+      if (!key) return;
       const s = document.createElement('script');
-      s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&libraries=places&callback=initGoogleMaps';
+      s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&libraries=places&loading=async&callback=initGoogleMaps';
       s.async = true;
       s.defer = true;
-      s.onerror = function () {
-        console.error('Google Maps failed to load. Verify API key and HTTP referrer restrictions for this domain.');
-      };
       document.body.appendChild(s);
     }
 
-    function attemptGeolocate() {
-      if (!navigator.geolocation) return;
-      navigator.geolocation.getCurrentPosition(function (pos) {
-        userLatLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      }, function () { }, { enableHighAccuracy: true, timeout: 8000 });
-    }
-
-    function tryFillOriginFromLatLng(latlng) {
-      if (!window.google || !google.maps) return;
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ location: latlng }, function (results, status) {
-        let addr = null;
-        if (status === 'OK' && results && results[0]) {
-          addr = results[0].formatted_address;
-        }
-        const v = addr ? addr : (latlng.lat + ',' + latlng.lng);
-        const fromInput = document.getElementById('from');
-        if (fromInput && !fromInput.value) fromInput.value = v;
-        routeIfReady();
-      });
-    }
-
-    function manualLoadKeyFrom(inputId, hideId) {
-      const el = document.getElementById(inputId);
-      if (!el || !el.value) return;
-      const meta = document.querySelector('meta[name="gmaps_api_key"]');
-      if (meta) meta.content = el.value.trim();
-      const hide = document.getElementById(hideId);
-      if (hide) hide.style.display = 'none';
-      loadGoogleMaps();
-    }
-
-    function geoFillOrigin() {
-      if (!navigator.geolocation) return;
-      navigator.geolocation.getCurrentPosition(function (pos) {
-        tryFillOriginFromLatLng({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      });
-    }
+    
   </script>
 
 </body>
