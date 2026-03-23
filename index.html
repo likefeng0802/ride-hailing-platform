@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Executive Car Service</title>
   <meta name="gmaps_api_key" content="AIzaSyDBd400Omikavo4IoBXnz-kbgllfxnJBaU"/>
+  <meta name="mailer_api_base" content=""/>
   <style>
     /* 基础样式重置 */
     * {
@@ -1146,7 +1147,14 @@
     
     async function sendBookingEmail(payload) {
       try {
-        const resp = await fetch('http://localhost:3690/api/booking-email', {
+        const apiMeta = document.querySelector('meta[name="mailer_api_base"]');
+        const overrideBase = apiMeta && apiMeta.content ? apiMeta.content.trim() : '';
+        const apiUrl = overrideBase
+          ? overrideBase
+          : ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+              ? 'http://localhost:3690/api/booking-email'
+              : '/api/booking-email');
+        const resp = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
